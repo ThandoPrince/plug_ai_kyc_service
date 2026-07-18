@@ -20,7 +20,7 @@ opencv_contrib_python==4.13.0.92
 opencv_python==4.13.0.92
 Pillow==12.3.0
 pydantic==2.13.4
-pyodide==0.0.2
+
 pyOpenSSL==26.3.0
 pytesseract==0.3.13
 redis==8.0.1
