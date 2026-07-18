@@ -29,4 +29,4 @@ SQLAlchemy==2.0.51
 thread==2.0.6
 typing_extensions==4.16.0
 uvicorn==0.51.0
-xmlrpclib==1.0.1
+
