@@ -1,7 +1,7 @@
 import os
 from fastapi import Header, HTTPException, status
 
-API_KEY = os.getenv("KYC_API_KEY")
+API_KEY = os.getenv("AI_API_KEY")
 
 
 def verify_api_key(x_api_key: str = Header(None)):
