@@ -17,7 +17,7 @@ from src.models.database import get_db
 from src.services.affidavit_service import AffidavitService
 from src.services.kyc_service import KYCService
 
-MAX_IMAGE_SIZE = 10 * 1024 * 1024      # 10 MB
+MAX_IMAGE_SIZE = 25 * 1024 * 1024      # 25 MB
 MAX_VIDEO_SIZE = 100 * 1024 * 1024     # 100 MB
 
 ALLOWED_IMAGE_TYPES = {
@@ -73,7 +73,7 @@ async def initiate_kyc(
 
     # Validate file sizes
     if len(id_bytes) > MAX_IMAGE_SIZE:
-        raise HTTPException(400, "ID document exceeds 10 MB.")
+        raise HTTPException(400, "ID document exceeds 25 MB.")
 
     if len(video_bytes) > MAX_VIDEO_SIZE:
         raise HTTPException(400, "Liveness video exceeds 100 MB.")

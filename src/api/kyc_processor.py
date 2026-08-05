@@ -189,10 +189,13 @@ class KYCProcessor:
             if image is None:
                 raise ValueError("Could not load document image")
 
+            MIN_WIDTH = 800
+            MIN_HEIGHT = 600
+
             checks = {
                 "resolution_check": {
-                    "passed": image.shape[0] >= 1000 and image.shape[1] >= 1000,
-                    "message": "Image resolution must be at least 1000x1000 pixels",
+                    "passed": image.shape[0] >= MIN_HEIGHT and image.shape[1] >= MIN_WIDTH,
+                    "message": f"Image resolution must be at least {MIN_WIDTH}x{MIN_HEIGHT} pixels",
                 },
                 "color_check": {
                     "passed": len(image.shape) == 3,
