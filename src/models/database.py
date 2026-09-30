@@ -40,6 +40,37 @@ class KYCRecord(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 
+class AddressVerificationRecord(Base):
+    __tablename__ = "address_verification_records"
+
+    id = Column(Integer, primary_key=True, index=True)
+
+    # Same reasoning as KYCRecord.customer_id — not unique, so repeat
+    # attempts (rejected -> resubmitted) keep their own audit history
+    # instead of overwriting a single row.
+    customer_id = Column(String, index=True)
+
+    full_name = Column(String)
+
+    verification_status = Column(String, default="pending", index=True)
+    risk_level = Column(String, nullable=True)
+    face_match_score = Column(Float, nullable=True)
+
+    # Two source documents plus the liveness frame, kept separate since
+    # this flow — unlike plain KYC — verifies ID, liveness, and address
+    # against each other rather than just ID vs. liveness.
+    id_document_path = Column(String, nullable=True)
+    selfie_path = Column(String, nullable=True)
+    address_document_path = Column(String, nullable=True)
+
+    # Full AI-service response payload (document/face-match/ID/address
+    # check details) kept for audit trail / manual review.
+    ai_response = Column(JSON, nullable=True)
+
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
 # Configurable via env var so this can point at Postgres/MySQL in
 # staging/production without code changes; falls back to local SQLite
 # for development.

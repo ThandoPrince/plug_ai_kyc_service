@@ -400,7 +400,7 @@ class KYCProcessor:
 
         return round(float(confidence), 4)
     
-# =========================================================
+    # =========================================================
     # ID document verification (Smart ID Card or green ID book)
     # =========================================================
 
@@ -503,5 +503,77 @@ class KYCProcessor:
                 response["confidence_score"] = round(sum([id_number_matches, name_match]) / 2, 4)
                 response["message"] = "ID document details did not match the submitted information."
                 response["error_type"] = "id_verification_error"
+
+            return response
+
+    # =========================================================
+    # Proof of address verification
+    # =========================================================
+
+    def verify_proof_of_address(
+            self,
+            document_path: str,
+            full_name: str,
+            id_number: str,
+        ) -> Dict:
+            """
+            OCR the proof-of-address document and confirm it references
+            the customer by full name and ID number.
+
+            This deliberately does not re-derive identity the way
+            verify_id_document does — that's already been established
+            against the ID document earlier in the pipeline. This step
+            only ties the address document to that same person, so a
+            simple existential text match (via find_identifier) is
+            enough; there's no separate "extracted identity" to validate
+            here since a utility bill/bank statement has no checksum-able
+            identifier of its own.
+            """
+            response = {
+                "success": False,
+                "verification_status": "rejected",
+                "ocr": {},
+                "matches": {},
+                "message": "",
+                "error_type": None,
+            }
+
+            ocr_result = self.document_processor.process(document_path)
+            response["ocr"] = {
+                "success": ocr_result["success"],
+                "document_type": ocr_result["document_type"],
+                "page_count": ocr_result["page_count"],
+                "error": ocr_result["error"],
+            }
+
+            if not ocr_result["success"]:
+                response["message"] = (
+                    ocr_result["error"] or "Could not read the proof of address document."
+                )
+                response["error_type"] = "ocr_error"
+                return response
+
+            raw_text = ocr_result["raw_text"]
+
+            matches = {
+                "full_name": find_identifier(raw_text, full_name),
+                "id_number": find_identifier(raw_text, id_number),
+            }
+            response["matches"] = matches
+
+            if matches["full_name"] and matches["id_number"]:
+                response["success"] = True
+                response["verification_status"] = "verified"
+                response["message"] = "Proof of address matches the customer's details."
+            else:
+                response["success"] = True  # the check ran fine — the details just didn't match
+                response["verification_status"] = "rejected"
+                response["error_type"] = "address_verification_error"
+                missing = [k.replace("_", " ") for k, v in matches.items() if not v]
+                response["message"] = (
+                    "Proof of address does not contain the customer's "
+                    + " and ".join(missing)
+                    + "."
+                )
 
             return response
